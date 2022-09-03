@@ -357,7 +357,7 @@ void loop() {
         showBoard();
         if (gameDraw() || gameOver()) {
           turn = 1;
-          state = 100;
+          state = 20;
         } else {
           showAvailablePositions();
           Serial.print("\n\nEnter the position = ");
@@ -375,7 +375,7 @@ void loop() {
           showBoard();
           if (gameDraw() || gameOver()) {
             turn = 0;
-            state = 100;
+            state = 20;
           } else {
             state = 2;
           }
@@ -397,7 +397,7 @@ void loop() {
           displayLastMove(turn, symbol[turn], lastMove);
           showBoard();
           if (gameDraw() || gameOver()) {
-            state = 100;
+            state = 20;
           } else {
             turn = !turn;
             showAvailablePositions();
@@ -411,7 +411,7 @@ void loop() {
       }
     break;
 
-    case 100:
+    case 20:
       Serial.println("gameover");
       state = 101;
     break;
