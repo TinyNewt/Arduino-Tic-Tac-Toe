@@ -1,5 +1,3 @@
-#include <SPI.h>
-
 const byte btns[11] = {3,4,5,6,7,8,9,10,14,15,16};
 const byte difficultyPot = A7;
 
