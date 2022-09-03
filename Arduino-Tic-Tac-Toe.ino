@@ -9,7 +9,7 @@ const byte btns[11] = {3,4,5,6,7,8,9,19,14,15,16};
 const byte pLeds[2] = {17, 18};
 const byte difficultyPot = A7;
 
-const int debounce = 100;
+const int debounce = 50;
 const int computerWait = 5000; // time to wait for the computer to make first move
 const int computerTurnWait = 1000;
 
