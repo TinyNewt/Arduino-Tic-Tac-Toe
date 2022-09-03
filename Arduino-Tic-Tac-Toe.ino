@@ -5,7 +5,7 @@ const bool ShiftPWM_balanceLoad = false;
 #include <ShiftPWM.h>
 
 
-const byte btns[11] = {3,4,5,6,7,8,9,10,14,15,16};
+const byte btns[11] = {3,4,5,6,7,8,9,19,14,15,16};
 const byte pLeds[2] = {17, 18};
 const byte difficultyPot = A7;
 
