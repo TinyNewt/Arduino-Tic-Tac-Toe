@@ -1,7 +1,7 @@
 const int ShiftPWM_latchPin=2;
 const bool ShiftPWM_invertOutputs = false;
 const bool ShiftPWM_balanceLoad = false;
-
+//#define SHIFTPWM_USE_TIMER2
 #include <ShiftPWM.h>
 
 
@@ -14,6 +14,11 @@ const int computerWait = 5000; // time to wait for the computer to make first mo
 const int computerTurnWait = 1000;
 
 const char symbol[2] = {'X', 'O'};
+
+
+unsigned char maxBrightness = 255;
+unsigned char pwmFrequency = 50;
+unsigned int numRegisters = 4;
 
 byte turn, moveIndex, lastMove, playerMode = 1;
 char board[3][3];
@@ -299,10 +304,14 @@ void ledPlayer(byte p) {
 
 void setup() {
   while(!Serial){
-    delay(100); 
+    delay(10); 
   }
   Serial.begin(115200);
-  Serial.print("Welcome to Digital Tic Tac Toe, created by TinyNewt\n");
+  ShiftPWM.SetAmountOfRegisters(numRegisters);
+  ShiftPWM.SetPinGrouping(1);
+  ShiftPWM.Start(pwmFrequency,maxBrightness);
+
+  ShiftPWM.SetAll(0);
   for ( byte i = 0; i < 11; ++i ) {
     pinMode(btns[i], INPUT_PULLUP);
   }
@@ -310,6 +319,8 @@ void setup() {
     pinMode(pLeds[i], OUTPUT);
     digitalWrite(pLeds[i], LOW);
   }
+  Serial.print("Welcome to Digital Tic Tac Toe, created by TinyNewt\n");
+
 
 }
 
@@ -337,6 +348,7 @@ void loop() {
     case 0:  // clear and setup board
       initialise();
       ledPlayer(playerMode);
+      ShiftPWM.SetAll(0);
       showInstructions();
       if (playerMode == 1) {
         state = 1;
@@ -361,6 +373,7 @@ void loop() {
 
     case 3: //computer wait until move displays
       if (moveIndex == 1 || millis() - time_now > computerTurnWait) {
+        ShiftPWM.SetRGB(lastMove -1, 255,0,0);
         displayLastMove('c', symbol[0], lastMove);
         showBoard();
         if (gameDraw() || gameOver()) {
@@ -378,6 +391,7 @@ void loop() {
       if (btn) {
         lastMove = humanPlay(btn, symbol[1]);
         if (lastMove) {
+          ShiftPWM.SetRGB(lastMove -1, 0,255,0);
           Serial.println(btn);
           displayLastMove('h', symbol[1], lastMove);
           showBoard();
@@ -403,6 +417,11 @@ void loop() {
         if (lastMove) {
           Serial.println(btn);          
           displayLastMove(turn, symbol[turn], lastMove);
+          if (turn)
+            ShiftPWM.SetRGB(lastMove -1, 0,255,0);
+          else
+            ShiftPWM.SetRGB(lastMove -1, 255,0,0);
+
           showBoard();
           if (gameDraw() || gameOver()) {
             state = 20;
