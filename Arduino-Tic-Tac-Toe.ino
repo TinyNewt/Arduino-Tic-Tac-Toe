@@ -6,6 +6,7 @@ const bool ShiftPWM_balanceLoad = false;
 
 
 const byte btns[11] = {3,4,5,6,7,8,9,10,14,15,16};
+const byte pLeds[2] = {17, 18};
 const byte difficultyPot = A7;
 
 const int debounce = 100;
@@ -290,11 +291,19 @@ void showAvailablePositions() {
 }
 
 void setup() {
+  while(!Serial){
+    delay(100); 
+  }
   Serial.begin(115200);
   Serial.print("Welcome to Digital Tic Tac Toe, created by TinyNewt\n");
   for ( byte i = 0; i < 11; ++i ) {
     pinMode(btns[i], INPUT_PULLUP);
   }
+  for ( byte i = 0; i< 2; i++) {
+    pinMode(pLeds[i], OUTPUT);
+    digitalWrite(pLeds[i], LOW);
+  }
+
 }
 
 void loop() {  
