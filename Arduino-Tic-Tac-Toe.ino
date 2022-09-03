@@ -290,6 +290,13 @@ void showAvailablePositions() {
       }
 }
 
+void ledPlayer(byte p) {
+  digitalWrite(pLeds[0], LOW);
+  digitalWrite(pLeds[1], LOW);
+  if (p)
+    digitalWrite(pLeds[p-1], HIGH);
+}
+
 void setup() {
   while(!Serial){
     delay(100); 
@@ -329,6 +336,7 @@ void loop() {
   switch(state) {
     case 0:  // clear and setup board
       initialise();
+      ledPlayer(playerMode);
       showInstructions();
       if (playerMode == 1) {
         state = 1;
