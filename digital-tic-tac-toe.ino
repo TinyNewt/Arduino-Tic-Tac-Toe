@@ -1,6 +1,7 @@
 #include <SPI.h>
 
 const byte btns[11] = {3,4,5,6,7,8,9,10,14,15,16};
+const byte difficultyPot = A7;
 
 const int debounce = 100;
 const int computerWait = 5000; // time to wait for the computer to make first move
@@ -36,6 +37,15 @@ int readBtn() {
     if (btn) return btn;
   }
   return 0;
+}
+
+int readDifficulty() {
+  int difficulty = map(analogRead(difficultyPot), 50, 1000, 0, 100);
+  if (difficulty < 0)
+    difficulty = 0;
+  else if (difficulty > 100)
+    difficulty = 100;
+  return difficulty;
 }
 
 int readSerial() {
@@ -246,11 +256,15 @@ byte randomMove() {
 
 byte computerPlay() {
   byte x, y, n;
-  if (moveIndex) { // if the computer starts pick one of the first corners as first move, otherwise the minimax function is too expensive
-    n = bestMove();
+  if (random(100) < readDifficulty()) { // decide to play minimax or random
+    if (moveIndex) { // if the computer starts pick one of the first corners as first move, otherwise the minimax function is too expensive
+      n = bestMove();
+    } else {
+      byte start[4] = { 0, 2, 6 ,8 }; //possible starting possitions
+      n = start[random(4)];
+    }
   } else {
-    byte start[4] = { 0, 2, 6 ,8 }; //possible starting possitions
-    n = start[random(4)];
+    n = randomMove();
   }
   x = n / 3;
   y = n % 3;
