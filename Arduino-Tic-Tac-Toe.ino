@@ -97,10 +97,10 @@ void showBoard() {
   Serial.print(text);
 }
 
-bool gameOver() {
+byte gameOver() {
   // board is filled
   if (moveIndex == 9)
-    return true;
+    return 2;
   
   // diagonal is crossed with the same player's move 
   if (board[0][0] == board[1][1] && 
