@@ -302,11 +302,13 @@ void ledPlayer(byte p) {
 }
 
 void glowOptions() {
-  for(byte i=0; i<3; i++)
-    for (byte j = 0; j < 3; j++)
-      if (board[i][j] == ' ') {
-        ShiftPWM.SetHSV((i * 3 + j), playColors[turn], 255, 20);
-      }
+  static byte brightness = 20;
+  if (state > 1 && state < 20)
+    for(byte i=0; i<3; i++)
+      for (byte j = 0; j < 3; j++)
+        if (board[i][j] == ' ') {
+          ShiftPWM.SetHSV((i * 3 + j), playColors[turn], 255, brightness);
+        }
 }
 
 void setup() {
@@ -347,9 +349,7 @@ void loop() {
     }
   }
 
-  if (state > 1 && state < 20) {
-    glowOptions();
-  }
+  glowOptions();
 
   switch(state) {
     case 0:  // clear and setup board
