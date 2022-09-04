@@ -1,7 +1,7 @@
 const int ShiftPWM_latchPin=2;
 const bool ShiftPWM_invertOutputs = false;
 const bool ShiftPWM_balanceLoad = false;
-//#define SHIFTPWM_USE_TIMER2
+
 #include <ShiftPWM.h>
 
 
@@ -14,7 +14,7 @@ const int computerWait = 5000; // time to wait for the computer to make first mo
 const int computerTurnWait = 1000;
 
 const char symbol[2] = {'X', 'O'};
-
+const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board colors in RGB
 
 unsigned char maxBrightness = 255;
 unsigned char pwmFrequency = 50;
@@ -373,7 +373,7 @@ void loop() {
 
     case 3: //computer wait until move displays
       if (moveIndex == 1 || millis() - time_now > computerTurnWait) {
-        ShiftPWM.SetRGB(lastMove -1, 255,0,0);
+        ShiftPWM.SetRGB(lastMove -1, playColors[0][0], playColors[0][1], playColors[0][2]);
         displayLastMove('c', symbol[0], lastMove);
         showBoard();
         if (gameDraw() || gameOver()) {
@@ -391,7 +391,7 @@ void loop() {
       if (btn) {
         lastMove = humanPlay(btn, symbol[1]);
         if (lastMove) {
-          ShiftPWM.SetRGB(lastMove -1, 0,255,0);
+          ShiftPWM.SetRGB(lastMove -1, playColors[1][0], playColors[1][1], playColors[1][2]);
           Serial.println(btn);
           displayLastMove('h', symbol[1], lastMove);
           showBoard();
@@ -418,9 +418,9 @@ void loop() {
           Serial.println(btn);          
           displayLastMove(turn, symbol[turn], lastMove);
           if (turn)
-            ShiftPWM.SetRGB(lastMove -1, 0,255,0);
+            ShiftPWM.SetRGB(lastMove -1, playColors[1][0], playColors[1][1], playColors[1][2]);
           else
-            ShiftPWM.SetRGB(lastMove -1, 255,0,0);
+            ShiftPWM.SetRGB(lastMove -1, playColors[0][0], playColors[0][1], playColors[0][2]);
 
           showBoard();
           if (gameDraw() || gameOver()) {
