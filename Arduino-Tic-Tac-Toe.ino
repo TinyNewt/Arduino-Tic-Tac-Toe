@@ -194,7 +194,7 @@ int bestMove(){
     for (int j = 0; j < 3; j++) {
       if (board[i][j] == ' ') {
         board[i][j] = symbol[0];
-        if (moveIndex == 4 && gameOver()) {
+        if (gameOver()) {
           board[i][j] = ' ';
           return i*3+j;
         }
