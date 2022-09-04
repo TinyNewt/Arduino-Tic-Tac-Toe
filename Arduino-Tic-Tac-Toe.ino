@@ -13,7 +13,7 @@ const int computerWait = 5000; // time to wait for the computer to make first mo
 const int computerTurnWait = 1000;
 
 const char symbol[2] = {'X', 'O'};
-const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board colors in RGB
+const byte playColors[2] = {0, 120}; // board color in Hue
 
 unsigned char maxBrightness = 255;
 unsigned char pwmFrequency = 75;
@@ -368,7 +368,7 @@ void loop() {
 
     case 3: //computer wait until move displays
       if (moveIndex == 1 || millis() - time_now > computerTurnWait) {
-        ShiftPWM.SetRGB(lastMove -1, playColors[0][0], playColors[0][1], playColors[0][2]);
+        ShiftPWM.SetHSV(lastMove -1, playColors[0], 255, 255);
         displayLastMove('c', symbol[0], lastMove);
         showBoard();
         if (gameDraw() || gameOver()) {
@@ -386,7 +386,7 @@ void loop() {
       if (btn) {
         lastMove = humanPlay(btn, symbol[1]);
         if (lastMove) {
-          ShiftPWM.SetRGB(lastMove -1, playColors[1][0], playColors[1][1], playColors[1][2]);
+          ShiftPWM.SetHSV(lastMove -1, playColors[1], 255, 255);
           Serial.println(btn);
           displayLastMove('h', symbol[1], lastMove);
           showBoard();
@@ -413,9 +413,9 @@ void loop() {
           Serial.println(btn);          
           displayLastMove(turn, symbol[turn], lastMove);
           if (turn)
-            ShiftPWM.SetRGB(lastMove -1, playColors[1][0], playColors[1][1], playColors[1][2]);
+            ShiftPWM.SetHSV(lastMove -1, playColors[1], 255, 255);
           else
-            ShiftPWM.SetRGB(lastMove -1, playColors[0][0], playColors[0][1], playColors[0][2]);
+            ShiftPWM.SetHSV(lastMove -1, playColors[0], 255,255);
 
           showBoard();
           if (gameDraw() || gameOver()) {
