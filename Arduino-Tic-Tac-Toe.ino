@@ -17,7 +17,7 @@ const char symbol[2] = {'X', 'O'};
 const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board colors in RGB
 
 unsigned char maxBrightness = 255;
-unsigned char pwmFrequency = 50;
+unsigned char pwmFrequency = 75;
 unsigned int numRegisters = 4;
 
 byte turn, moveIndex, lastMove, playerMode = 1;
