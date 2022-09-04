@@ -6,7 +6,6 @@ const bool ShiftPWM_balanceLoad = false;
 
 
 const byte btns[11] = {3,4,5,6,7,8,9,19,14,15,16};
-const byte pLeds[2] = {17, 18};
 const byte difficultyPot = A7;
 
 const int debounce = 50;
@@ -296,10 +295,10 @@ void showAvailablePositions() {
 }
 
 void ledPlayer(byte p) {
-  digitalWrite(pLeds[0], LOW);
-  digitalWrite(pLeds[1], LOW);
+    ShiftPWM.SetOne(27, 0);
+    ShiftPWM.SetOne(28, 0);
   if (p)
-    digitalWrite(pLeds[p-1], HIGH);
+    ShiftPWM.SetOne(27 -1 +p, 255);
 }
 
 void setup() {
@@ -314,10 +313,6 @@ void setup() {
   ShiftPWM.SetAll(0);
   for ( byte i = 0; i < 11; ++i ) {
     pinMode(btns[i], INPUT_PULLUP);
-  }
-  for ( byte i = 0; i< 2; i++) {
-    pinMode(pLeds[i], OUTPUT);
-    digitalWrite(pLeds[i], LOW);
   }
   Serial.print("Welcome to Digital Tic Tac Toe, created by TinyNewt\n");
 
@@ -347,8 +342,8 @@ void loop() {
   switch(state) {
     case 0:  // clear and setup board
       initialise();
-      ledPlayer(playerMode);
       ShiftPWM.SetAll(0);
+      ledPlayer(playerMode);
       showInstructions();
       if (playerMode == 1) {
         state = 1;
