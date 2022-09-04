@@ -12,7 +12,7 @@ const int debounce = 50;
 const int computerWait = 5000; // time to wait for the computer to make first move
 const int computerTurnWait = 1000;
 
-const char symbol[2] = {'X', 'O'};
+const char playSymbol[2] = {'X', 'O'};
 const byte playColors[2] = {0, 120}; // board color in Hue
 
 const byte maxBrightness = 255;
@@ -153,7 +153,7 @@ int minimax(int depth, bool isAI) {
         for(int i=0; i<3; i++) {
           for(int j=0; j<3; j++) {
             if (board[i][j] == ' ') {
-              board[i][j] = symbol[0];
+              board[i][j] = playSymbol[0];
               score = minimax(depth + 1, false);
               board[i][j] = ' ';
               if(score > bestScore) {
@@ -168,7 +168,7 @@ int minimax(int depth, bool isAI) {
         for (int i = 0; i < 3; i++) {
           for (int j = 0; j < 3; j++) {
             if (board[i][j] == ' ') {
-              board[i][j] = symbol[1];
+              board[i][j] = playSymbol[1];
               score = minimax(depth + 1, true);
               board[i][j] = ' ';
               if (score < bestScore) {
@@ -192,7 +192,7 @@ int bestMove(){
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       if (board[i][j] == ' ') {
-        board[i][j] = symbol[0];
+        board[i][j] = playSymbol[0];
         if (moveIndex >= 4 && gameOver()) {
           board[i][j] = ' ';
           return i*3+j;
@@ -278,7 +278,7 @@ byte computerPlay() {
   }
   x = n / 3;
   y = n % 3;
-  board[x][y] = symbol[0]; 
+  board[x][y] = playSymbol[0]; 
   moveIndex++;
   return n+1;
 }
@@ -369,7 +369,7 @@ void loop() {
     case 3: //computer wait until move displays
       if (moveIndex == 1 || millis() - time_now > computerTurnWait) {
         ShiftPWM.SetHSV(lastMove -1, playColors[0], 255, 255);
-        displayLastMove('c', symbol[0], lastMove);
+        displayLastMove('c', playSymbol[0], lastMove);
         showBoard();
         if (gameDraw() || gameOver()) {
           turn = 1;
@@ -384,11 +384,11 @@ void loop() {
 
     case 4:
       if (btn) {
-        lastMove = humanPlay(btn, symbol[1]);
+        lastMove = humanPlay(btn, playSymbol[1]);
         if (lastMove) {
           ShiftPWM.SetHSV(lastMove -1, playColors[1], 255, 255);
           Serial.println(btn);
-          displayLastMove('h', symbol[1], lastMove);
+          displayLastMove('h', playSymbol[1], lastMove);
           showBoard();
           if (gameDraw() || gameOver()) {
             turn = 0;
@@ -408,10 +408,10 @@ void loop() {
 
     case 12:
       if (btn) {
-        lastMove = humanPlay(btn, symbol[turn]);
+        lastMove = humanPlay(btn, playSymbol[turn]);
         if (lastMove) {
           Serial.println(btn);          
-          displayLastMove(turn, symbol[turn], lastMove);
+          displayLastMove(turn, playSymbol[turn], lastMove);
           if (turn)
             ShiftPWM.SetHSV(lastMove -1, playColors[1], 255, 255);
           else
