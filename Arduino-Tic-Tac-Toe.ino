@@ -15,9 +15,9 @@ const int computerTurnWait = 1000;
 const char symbol[2] = {'X', 'O'};
 const byte playColors[2] = {0, 120}; // board color in Hue
 
-unsigned char maxBrightness = 255;
-unsigned char pwmFrequency = 75;
-unsigned int numRegisters = 4;
+const byte maxBrightness = 255;
+const byte pwmFrequency = 75;
+const word numRegisters = 4;
 
 byte turn, moveIndex, lastMove, playerMode = 1;
 char board[3][3];
