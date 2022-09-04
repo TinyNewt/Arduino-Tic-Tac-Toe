@@ -301,6 +301,14 @@ void ledPlayer(byte p) {
     ShiftPWM.SetOne(27 -1 +p, 255);
 }
 
+void glowOptions() {
+  for(byte i=0; i<3; i++)
+    for (byte j = 0; j < 3; j++)
+      if (board[i][j] == ' ') {
+        ShiftPWM.SetHSV((i * 3 + j), playColors[turn], 255, 20);
+      }
+}
+
 void setup() {
   while(!Serial){
     delay(10); 
@@ -339,6 +347,10 @@ void loop() {
     }
   }
 
+  if (state > 1 && state < 20) {
+    glowOptions();
+  }
+
   switch(state) {
     case 0:  // clear and setup board
       initialise();
@@ -371,8 +383,8 @@ void loop() {
         ShiftPWM.SetHSV(lastMove -1, playColors[0], 255, 255);
         displayLastMove('c', playSymbol[0], lastMove);
         showBoard();
+        turn = 1;
         if (gameDraw() || gameOver()) {
-          turn = 1;
           state = 20;
         } else {
           showAvailablePositions();
@@ -390,8 +402,8 @@ void loop() {
           Serial.println(btn);
           displayLastMove('h', playSymbol[1], lastMove);
           showBoard();
+          turn = 0;
           if (gameDraw() || gameOver()) {
-            turn = 0;
             state = 20;
           } else {
             state = 2;
