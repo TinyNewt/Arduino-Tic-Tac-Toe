@@ -19,7 +19,7 @@ const byte maxBrightness = 255;
 const byte pwmFrequency = 75;
 const word numRegisters = 4;
 
-byte turn, moveIndex, lastMove, playerMode = 1;
+byte turn, moveIndex, lastMove, gameEnded = 1, playerMode = 1;
 char board[3][3];
 unsigned long time_now = 0;
 
@@ -95,10 +95,6 @@ void showBoard() {
   Serial.print(text);
   sprintf(text, "\t\t\t %c | %c | %c \n\n", board[2][0], board[2][1], board[2][2]);  
   Serial.print(text);
-}
-
-bool gameDraw() {
-  return moveIndex == 9;
 }
 
 bool gameOver() {
@@ -218,6 +214,7 @@ void initialise() {
       board[i][j] = ' '; 
   }
   moveIndex = 0;
+  gameEnded = 0;
 }
 
 void displayLastMove(char who, char symbol, byte cell) {
@@ -384,7 +381,7 @@ void loop() {
         displayLastMove('c', playSymbol[0], lastMove);
         showBoard();
         turn = 1;
-        if (gameDraw() || gameOver()) {
+        if (gameOver()) {
           state = 20;
         } else {
           showAvailablePositions();
@@ -403,7 +400,7 @@ void loop() {
           displayLastMove('h', playSymbol[1], lastMove);
           showBoard();
           turn = 0;
-          if (gameDraw() || gameOver()) {
+          if (gameOver()) {
             state = 20;
           } else {
             state = 2;
@@ -430,7 +427,7 @@ void loop() {
             ShiftPWM.SetHSV(lastMove -1, playColors[0], 255,255);
 
           showBoard();
-          if (gameDraw() || gameOver()) {
+          if (gameOver()) {
             state = 20;
           } else {
             turn = !turn;
@@ -447,6 +444,7 @@ void loop() {
 
     case 20:
       Serial.println("gameover");
+      gameEnded = 1;
       state = 101;
     break;
   }
