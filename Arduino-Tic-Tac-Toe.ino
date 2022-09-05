@@ -11,19 +11,98 @@ const byte difficultyPot = A7;
 const int debounce = 50;
 const int computerWait = 5000; // time to wait for the computer to make first move
 const int computerTurnWait = 1000;
+const int playFadeSpeed = 500;
 
 const char playSymbol[2] = {'X', 'O'};
-const byte playColors[2] = {0, 120}; // board color in Hue
+const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board color in RGB
+const byte optionBrightness = 5;
 
-const byte maxBrightness = 255;
 const byte pwmFrequency = 75;
 const word numRegisters = 4;
 
-byte turn, moveIndex, lastMove, gameEnded = 1, playerMode = 1;
-char board[3][3];
-unsigned long time_now = 0;
+byte turn, moveIndex, lastMove, gameEnded = 1, playerMode = 1, state = 0;
 
-byte state = 0;
+char board[3][3];
+byte currentRGB[9][3] = { 0 }, targetRGB[9][3] = { 0 };
+bool fadingRGB[9] = { 0 };
+unsigned long fadeTimeRGB[9];
+
+bool runningRGB() {
+  return (memcmp (targetRGB, currentRGB,  sizeof (currentRGB)) != 0);
+}
+
+void setRGB(byte led, byte RGB[3], unsigned long duration, byte brightness = 255) {
+  if (brightness != 255)
+    for (byte i; i< 3; i++) {
+      targetRGB[led][i] = RGB[i]/255*brightness;
+    } else {
+      memcpy(targetRGB[led], RGB, sizeof(targetRGB[0]));
+    }
+  fadeTimeRGB[led] = duration;
+  fadingRGB[led] = 0;
+}
+
+void clearRGB(unsigned long fadeTime = 0) {
+
+  for (int i =0; i<9; i++) {
+    for (int j=0; j<3; j++) {
+      targetRGB[i][j] = 0;
+    }
+    fadeTimeRGB[i] = fadeTime;
+    fadingRGB[i] = 0;
+  }
+}
+
+void fadeRGB() {
+  static byte startRGB[9][3];
+  static unsigned long startTime[9];
+
+  unsigned long timer;
+  unsigned long currentStep;
+
+  byte delta;
+
+  unsigned long now = millis();
+
+  for (byte i = 0; i< 9; i++) {
+    if (memcmp (targetRGB[i], currentRGB[i],  sizeof (currentRGB[0])) != 0) {
+
+      if (fadeTimeRGB[i]) {
+        if (!fadingRGB[i]) {
+          startTime[i] = now;
+          fadingRGB[i] = 1; // on change update this
+          memcpy(startRGB[i], currentRGB[i], sizeof(currentRGB[0]));
+        }
+  
+        timer = now - startTime[i];
+        currentStep = timer % fadeTimeRGB[i];
+        
+        for (byte j =0;j<3;j++) {
+          if (startRGB[i][j] < targetRGB[i][j])
+            delta = targetRGB[i][j] - startRGB[i][j];
+          else if (startRGB[i][j] > targetRGB[i][j])
+            delta = startRGB[i][j] - targetRGB[i][j];
+          else
+            delta = 0;
+            //if (delta == 255) delta--;
+          //Serial.println(delta);
+
+          if (delta) {
+            if (startRGB[i][j] < targetRGB[i][j])
+              currentRGB[i][j] = startRGB[i][j] + currentStep*delta/fadeTimeRGB[i];
+            else
+              currentRGB[i][j] = startRGB[i][j] - currentStep*delta/fadeTimeRGB[i];
+          }
+        }
+      }
+      if (!fadeTimeRGB[i] || timer >= fadeTimeRGB[i] || memcmp (currentRGB[i], targetRGB[i],  sizeof (currentRGB[0])) == 0) {
+        fadingRGB[i] = 0;
+        memcpy(currentRGB[i], targetRGB[i], sizeof(currentRGB[0]));
+      }
+      ShiftPWM.SetRGB(i, currentRGB[i][0], currentRGB[i][1], currentRGB[i][2]);
+    }
+  }
+}
 
 int readBtn() {
   static byte buttonState[11], lastButtonState[11] = {0};
@@ -95,6 +174,17 @@ void showBoard() {
   Serial.print(text);
   sprintf(text, "\t\t\t %c | %c | %c \n\n", board[2][0], board[2][1], board[2][2]);  
   Serial.print(text);
+}
+
+void glowOptions() {
+  byte brightness = optionBrightness;
+  for(byte i=0; i<3; i++)
+    for (byte j = 0; j < 3; j++)
+      if (board[i][j] == ' ') {
+        if (gameEnded)
+          brightness = 0;
+        setRGB(i * 3 + j, playColors[turn], playFadeSpeed, brightness);
+      }
 }
 
 byte gameOver() {
@@ -298,16 +388,6 @@ void ledPlayer(byte p) {
     ShiftPWM.SetOne(27 -1 +p, 255);
 }
 
-void glowOptions() {
-  static byte brightness = 20;
-  if (state > 1 && state < 20)
-    for(byte i=0; i<3; i++)
-      for (byte j = 0; j < 3; j++)
-        if (board[i][j] == ' ') {
-          ShiftPWM.SetHSV((i * 3 + j), playColors[turn], 255, brightness);
-        }
-}
-
 void setup() {
   while(!Serial){
     delay(10); 
@@ -315,19 +395,21 @@ void setup() {
   Serial.begin(115200);
   ShiftPWM.SetAmountOfRegisters(numRegisters);
   ShiftPWM.SetPinGrouping(1);
-  ShiftPWM.Start(pwmFrequency,maxBrightness);
+  ShiftPWM.Start(pwmFrequency,255);
 
   ShiftPWM.SetAll(0);
   for ( byte i = 0; i < 11; ++i ) {
     pinMode(btns[i], INPUT_PULLUP);
   }
   Serial.print("Welcome to Digital Tic Tac Toe, created by TinyNewt\n");
-
-
 }
 
-void loop() {  
+void loop() {
+  static unsigned long time_now = 0;  
   byte btn;
+
+  fadeRGB();
+
   btn = readSerial();
   if (!btn) {
     btn = readBtn();
@@ -346,12 +428,10 @@ void loop() {
     }
   }
 
-  glowOptions();
-
   switch(state) {
     case 0:  // clear and setup board
       initialise();
-      ShiftPWM.SetAll(0);
+      clearRGB(playFadeSpeed);
       ledPlayer(playerMode);
       showInstructions();
       if (playerMode == 1) {
@@ -370,17 +450,17 @@ void loop() {
     break;
 
     case 2: // computer move
-      time_now = millis();
       lastMove = computerPlay();
       state = 3;
     break;
 
     case 3: //computer wait until move displays
       if (moveIndex == 1 || millis() - time_now > computerTurnWait) {
-        ShiftPWM.SetHSV(lastMove -1, playColors[0], 255, 255);
+        setRGB(lastMove -1, playColors[0], playFadeSpeed);
         displayLastMove('c', playSymbol[0], lastMove);
         showBoard();
         turn = 1;
+        glowOptions();
         if (gameOver()) {
           state = 20;
         } else {
@@ -395,23 +475,31 @@ void loop() {
       if (btn) {
         lastMove = humanPlay(btn, playSymbol[1]);
         if (lastMove) {
-          ShiftPWM.SetHSV(lastMove -1, playColors[1], 255, 255);
+          setRGB(lastMove -1, playColors[1], playFadeSpeed);
           Serial.println(btn);
           displayLastMove('h', playSymbol[1], lastMove);
           showBoard();
           turn = 0;
+          glowOptions();
           if (gameOver()) {
             state = 20;
           } else {
-            state = 2;
+            state = 5;
           }
         }
       }
     break;
 
+    case 5: // wait for the effect to end, because it hangs on move calculation
+      time_now = millis();
+      if (!runningRGB())
+        state = 2;
+    break;
+
     case 11:
       Serial.print("\n\nPlayer 1, Enter the position: ");
       turn = 0;
+      glowOptions();
       state = 12;
     break;
 
@@ -421,16 +509,18 @@ void loop() {
         if (lastMove) {
           Serial.println(btn);          
           displayLastMove(turn, playSymbol[turn], lastMove);
-          if (turn)
-            ShiftPWM.SetHSV(lastMove -1, playColors[1], 255, 255);
-          else
-            ShiftPWM.SetHSV(lastMove -1, playColors[0], 255,255);
+          if (turn) {
+            setRGB(lastMove -1, playColors[1], playFadeSpeed);
+          } else {
+            setRGB(lastMove -1, playColors[0], playFadeSpeed);
+          }
 
           showBoard();
           if (gameOver()) {
             state = 20;
           } else {
             turn = !turn;
+            glowOptions();
             showAvailablePositions();
             if (turn) {
               Serial.print("\n\nPlayer 2, Enter the position: ");
@@ -443,8 +533,9 @@ void loop() {
     break;
 
     case 20:
-      Serial.println("gameover");
       gameEnded = 1;
+      Serial.println("gameover");
+      glowOptions();
       state = 101;
     break;
   }
