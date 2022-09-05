@@ -4,10 +4,6 @@ const bool ShiftPWM_balanceLoad = false;
 
 #include <ShiftPWM.h>
 
-
-const byte btns[11] = {3,4,5,6,7,8,9,19,14,15,16};
-const byte difficultyPot = A7;
-
 const int debounce = 50;
 const int computerWait = 5000; // time to wait for the computer to make first move
 const int computerTurnWait = 1000;
@@ -16,9 +12,18 @@ const int playFadeSpeed = 500;
 const char playSymbol[2] = {'X', 'O'};
 const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board color in RGB
 const byte optionBrightness = 5;
+const int endFadeSpeed = 700;
+const int playerBrightness =100;
+const byte endBrightness = 5;
+const int drawDimWait = 1000;
+const int winDimWait = 0;
+const int endStateKeyTimeout = 3000;
 
 const byte pwmFrequency = 75;
 const word numRegisters = 4;
+
+const byte btns[11] = {3,4,5,6,7,8,9,19,14,15,16};
+const byte difficultyPot = A7;
 
 byte turn, moveIndex, lastMove, gameEnded = 1, playerMode = 1, state = 0;
 
@@ -176,6 +181,31 @@ void showBoard() {
   Serial.print(text);
 }
 
+void dimEnd(bool winFade = false) {
+  byte winner[9] = {0};
+  for(byte i=0; i<3; i++)
+    for (byte j = 0; j < 3; j++)
+      for (byte k = 0; k < 2; k++) {
+        if (board[i][j] == playSymbol[k]) {
+          setRGB(i * 3 + j, playColors[k], endFadeSpeed, endBrightness);
+        }
+      }
+  if (!winFade) {
+    if ( gameEnded == 11 )
+      winner[0] = winner[4] = winner[8] = 1;
+    else if ( gameEnded == 12 )
+      winner[2] = winner[4] = winner[6] = 1;
+    else if ( gameEnded > 30)
+      winner[(gameEnded - 31)*3+0] = winner[(gameEnded - 31)*3+1] = winner[(gameEnded - 31)*3+2] = 1;
+    else
+      winner[0*3+gameEnded-21] = winner[1*3+gameEnded-21] = winner[2*3+gameEnded-21] = 1;
+
+    for (byte i =0; i< 9; i++)
+      if (winner[i])
+        setRGB(i, playColors[turn], endFadeSpeed, 255);
+  }
+}
+
 void glowOptions() {
   byte brightness = optionBrightness;
   for(byte i=0; i<3; i++)
@@ -187,28 +217,31 @@ void glowOptions() {
       }
 }
 
-byte gameOver() {
+byte gameDraw() {
   // board is filled
   if (moveIndex == 9)
-    return 2;
-  
+    return 1;
+  return 0;
+}
+
+byte gameOver() {
   // diagonal is crossed with the same player's move 
   if (board[0][0] == board[1][1] && 
     board[1][1] == board[2][2] && 
     board[0][0] != ' ') 
-    return true; 
+    return 11; 
     
   if (board[0][2] == board[1][1] && 
     board[1][1] == board[2][0] && 
     board[0][2] != ' ') 
-    return true;
+    return 12;
 
   // column is crossed with the same player's move 
   for (int i=0; i<3; i++) { 
     if (board[0][i] == board[1][i] && 
       board[1][i] == board[2][i] && 
       board[0][i] != ' ') 
-      return true;
+      return 21+i;
   }
 
   // row is crossed with the same player's move 
@@ -217,9 +250,9 @@ byte gameOver() {
     if (board[i][0] == board[i][1] && 
       board[i][1] == board[i][2] && 
       board[i][0] != ' ') 
-      return true; 
+      return 31+i; 
   } 
-  return false; // no gameover yet
+  return 0; // no gameover yet
 
 } 
 
@@ -227,7 +260,7 @@ byte gameOver() {
 int minimax(int depth, bool isAI) {
   int score = 0;
   int bestScore = 0;
-  if (gameOver() == true) {
+  if (gameDraw() || gameOver()) {
     if (isAI == true)
       return -1;
     if (isAI == false)
@@ -385,7 +418,7 @@ void ledPlayer(byte p) {
     ShiftPWM.SetOne(27, 0);
     ShiftPWM.SetOne(28, 0);
   if (p)
-    ShiftPWM.SetOne(27 -1 +p, 255);
+    ShiftPWM.SetOne(27 -1 +p, playerBrightness);
 }
 
 void setup() {
@@ -428,6 +461,9 @@ void loop() {
     }
   }
 
+  if (state > 20 && state < 50 && millis() - time_now > endStateKeyTimeout && btn)
+    state = 0;
+
   switch(state) {
     case 0:  // clear and setup board
       initialise();
@@ -461,7 +497,10 @@ void loop() {
         showBoard();
         turn = 1;
         glowOptions();
-        if (gameOver()) {
+        gameEnded = gameDraw();
+        if (!gameEnded)
+          gameEnded = gameOver();
+        if (gameEnded) {
           state = 20;
         } else {
           showAvailablePositions();
@@ -481,7 +520,12 @@ void loop() {
           showBoard();
           turn = 0;
           glowOptions();
-          if (gameOver()) {
+
+          gameEnded = gameDraw();
+          if (!gameEnded)
+            gameEnded = gameOver();
+          
+          if (gameEnded) {
             state = 20;
           } else {
             state = 5;
@@ -516,7 +560,11 @@ void loop() {
           }
 
           showBoard();
-          if (gameOver()) {
+          gameEnded = gameDraw();
+          if (!gameEnded)
+            gameEnded = gameOver();
+            
+          if (gameEnded) {
             state = 20;
           } else {
             turn = !turn;
@@ -533,10 +581,44 @@ void loop() {
     break;
 
     case 20:
-      gameEnded = 1;
+      if (playerMode == 1)
+        turn = !turn;
+
       Serial.println("gameover");
       glowOptions();
-      state = 101;
+
+      if (gameEnded == 1)
+        state = 21;
+      else
+        state = 22;
+      time_now = millis();
     break;
+
+    case 21: // draw state
+      if (millis() - time_now > drawDimWait) {
+        state = 31;
+      }
+    break;
+
+    case 22: // win state
+      if (millis() - time_now > winDimWait) {
+        state = 31;
+      }
+    break;
+
+    case 31:
+      if (!runningRGB()) {
+        dimEnd();
+        state = 32;
+      }
+    break;
+
+    case 32:
+     if (!runningRGB()) {
+       dimEnd(true);
+       state = 31;
+     }
+    break;
+
   }
 }
