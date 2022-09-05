@@ -10,24 +10,26 @@ const int computerTurnWait = 1000;
 const int playFadeSpeed = 500;
 
 const char playSymbol[2] = {'X', 'O'};
-const byte playColors[2][3] = {{179,77,0}, {0,179,131}}; // board color in RGB, color blind friendly
-const byte optionBrightness = 5;
-const int endFadeSpeed = 700;
-const int playerBrightness =100;
-const byte endBrightness = 5;
-const int drawDimWait = 1000;
-const int winDimWait = 1000;
-const int endStateKeyTimeout = 3000;
+const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board color in RGB
+const byte optionBrightness = 5; // set the brightness for displaying the options
+const int endFadeSpeed = 700; // speed that the none winning positions fade down
+const int playerBrightness =100; // brightness of the player selection leds
+const byte endBrightness = 5; // brightness at gameover that are not winners
+const int drawDimWait = 1000; // wait before the end dim state in a draw
+const int winDimWait = 1000; // wait before the end dim state when there is a winner
+const int endStateKeyTimeout = 3000; // wait before the game can be restarted via the gameboard
 
-const unsigned long idleTimeout = 300000;
-const unsigned long cycleTimeRainbow = 20000;
-const byte idleBrightness = 75;
+const unsigned long idleTimeout = 300000; // time to wait for the idle animation
+const unsigned long cycleTimeRainbow = 20000; // cycle time rainbow idle animation
+const byte idleBrightness = 75; // brightness of the leds when in idle
 
-const byte pwmFrequency = 75;
+const byte pwmFrequency = 75; // led update frequenct
 const word numRegisters = 4;
 
 const byte btns[11] = {3,4,5,6,7,8,9,19,14,15,16};
 const byte difficultyPot = A7;
+
+// end of config options
 
 byte turn, moveIndex, lastMove, gameEnded = 1, playerMode = 1, state = 0;
 
