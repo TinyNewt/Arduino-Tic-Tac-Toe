@@ -10,7 +10,7 @@ const int computerTurnWait = 1000;
 const int playFadeSpeed = 500;
 
 const char playSymbol[2] = {'X', 'O'};
-const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board color in RGB
+const byte playColors[2][3] = {{179,77,0}, {0,179,131}}; // board color in RGB, color blind friendly
 const byte optionBrightness = 5;
 const int endFadeSpeed = 700;
 const int playerBrightness =100;
@@ -18,6 +18,10 @@ const byte endBrightness = 5;
 const int drawDimWait = 1000;
 const int winDimWait = 1000;
 const int endStateKeyTimeout = 3000;
+
+const unsigned long idleTimeout = 300000;
+const unsigned long cycleTimeRainbow = 20000;
+const byte idleBrightness = 75;
 
 const byte pwmFrequency = 75;
 const word numRegisters = 4;
@@ -36,15 +40,84 @@ bool runningRGB() {
   return (memcmp (targetRGB, currentRGB,  sizeof (currentRGB)) != 0);
 }
 
-void setRGB(byte led, byte RGB[3], unsigned long duration, byte brightness = 255) {
-  if (brightness != 255)
+void setRGB(byte led, byte RGB[3], unsigned long duration = 0, byte brightness = 255) {
+  if (brightness != 255) {
     for (byte i; i< 3; i++) {
       targetRGB[led][i] = RGB[i]/255*brightness;
-    } else {
-      memcpy(targetRGB[led], RGB, sizeof(targetRGB[0]));
+    } 
+  } else {
+      memcpy(targetRGB[led], RGB, sizeof(targetRGB[0])); 
     }
-  fadeTimeRGB[led] = duration;
   fadingRGB[led] = 0;
+  if (duration) {
+    fadeTimeRGB[led] = duration;
+  } else {
+    memcpy(currentRGB[led], RGB, sizeof(currentRGB[0]));
+    ShiftPWM.SetRGB(led, RGB[0], RGB[1], RGB[2]); 
+  }
+}
+
+setHSV(byte led, byte HSV[3], unsigned long duration = 0){
+  unsigned int hue = HSV[0];
+  unsigned int sat = HSV[1];
+  unsigned int val = HSV[2];
+  byte RGB[3];
+  unsigned char r,g,b;
+  unsigned int H_accent = hue/60;
+  unsigned int bottom = ((255 - sat) * val)>>8;
+  unsigned int top = val;
+  unsigned char rising  = ((top-bottom)  *(hue%60   )  )  /  60  +  bottom;
+  unsigned char falling = ((top-bottom)  *(60-hue%60)  )  /  60  +  bottom;
+
+  switch(H_accent) {
+  case 0:
+    r = top;
+    g = rising;
+    b = bottom;
+    break;
+
+  case 1:
+    r = falling;
+    g = top;
+    b = bottom;
+    break;
+
+  case 2:
+    r = bottom;
+    g = top;
+    b = rising;
+    break;
+
+  case 3:
+    r = bottom;
+    g = falling;
+    b = top;
+    break;
+
+  case 4:
+    r = rising;
+    g = bottom;
+    b = top;
+    break;
+
+  case 5:
+    r = top;
+    g = bottom;
+    b = falling;
+    break;
+  }
+  RGB[0] = r;
+  RGB[1] = g;
+  RGB[2] = b;
+
+  
+  if (duration)
+    setRGB(led, RGB[3], duration);
+  else {
+    memcpy(currentRGB[led], RGB, sizeof(currentRGB[0]));
+    memcpy(targetRGB[led], RGB, sizeof(targetRGB[0]));
+    ShiftPWM.SetRGB(led, r, g, b);
+  }
 }
 
 void clearRGB(unsigned long fadeTime = 0) {
@@ -89,8 +162,6 @@ void fadeRGB() {
             delta = startRGB[i][j] - targetRGB[i][j];
           else
             delta = 0;
-            //if (delta == 255) delta--;
-          //Serial.println(delta);
 
           if (delta) {
             if (startRGB[i][j] < targetRGB[i][j])
@@ -421,6 +492,20 @@ void ledPlayer(byte p) {
     ShiftPWM.SetOne(27 -1 +p, playerBrightness);
 }
 
+void rgbLedRainbow(unsigned long timeNow){
+  int rainbowWidth = 9;
+  // Displays a rainbow spread over a few LED's (numRGBLeds), which shifts in hue. 
+  // The rainbow can be wider then the real number of LED's.
+  unsigned long time = millis()-timeNow;
+  unsigned long colorShift = (360*time/cycleTimeRainbow)%360; // this color shift is like the hue slider in Photoshop.
+  byte HSV[3] = { 255, 255, idleBrightness };
+
+  for(unsigned int led=0;led<rainbowWidth;led++){ // loop over all LED's
+    HSV[0] = ((led)*360/(rainbowWidth-1)+colorShift)%360; // Set hue from 0 to 360 from first to last led and shift the hue
+    setHSV(led, HSV); // write the HSV values, with saturation and value at maximum
+  }
+}
+
 void setup() {
   while(!Serial){
     delay(10); 
@@ -438,7 +523,9 @@ void setup() {
 }
 
 void loop() {
-  static unsigned long timeNow = 0;  
+  static unsigned long timeNow = 0;
+  static unsigned long timeIdle = 0;
+
   byte btn;
 
   fadeRGB();
@@ -459,10 +546,17 @@ void loop() {
       Serial.print("Human begins\n");
       state = 4;
     }
+    timeIdle = millis();
+    if (state > 100) {
+      ledPlayer(playerMode);
+      state = 0;
+    }
   }
 
   if (state > 20 && state < 50 && millis() - timeNow > endStateKeyTimeout && btn)
     state = 0;
+  if (state < 100 && millis() - timeIdle > idleTimeout)
+    state = 101;
 
   switch(state) {
     case 0:  // clear and setup board
@@ -620,5 +714,23 @@ void loop() {
      }
     break;
 
+    case 101:
+      Serial.print("\n\nGoing into idle mode\n");
+      playerMode = 1;
+      ledPlayer(0);
+      clearRGB(endFadeSpeed);
+      state = 102;
+    break;
+
+    case 102:
+      if (!runningRGB()) {
+        timeNow = millis();
+        state = 120;
+      }
+    break;
+
+    case 120:
+      rgbLedRainbow(timeNow);
+    break;
   }
 }
