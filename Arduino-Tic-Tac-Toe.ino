@@ -16,7 +16,7 @@ const int endFadeSpeed = 700;
 const int playerBrightness =100;
 const byte endBrightness = 5;
 const int drawDimWait = 1000;
-const int winDimWait = 0;
+const int winDimWait = 1000;
 const int endStateKeyTimeout = 3000;
 
 const byte pwmFrequency = 75;
@@ -438,7 +438,7 @@ void setup() {
 }
 
 void loop() {
-  static unsigned long time_now = 0;  
+  static unsigned long timeNow = 0;  
   byte btn;
 
   fadeRGB();
@@ -461,7 +461,7 @@ void loop() {
     }
   }
 
-  if (state > 20 && state < 50 && millis() - time_now > endStateKeyTimeout && btn)
+  if (state > 20 && state < 50 && millis() - timeNow > endStateKeyTimeout && btn)
     state = 0;
 
   switch(state) {
@@ -475,11 +475,11 @@ void loop() {
       } else {
         state = 11; // jump to 2 player mode
       }
-      time_now = millis();
+      timeNow = millis();
     break;
   
     case 1:  // wait for the player to start on timeout the computer has a first turn
-      if (millis() - time_now > computerWait) {
+      if (millis() - timeNow > computerWait) {
         Serial.print("Timeout reached, Computer begins\n\n");
         state = 2;
       }
@@ -491,7 +491,7 @@ void loop() {
     break;
 
     case 3: //computer wait until move displays
-      if (moveIndex == 1 || millis() - time_now > computerTurnWait) {
+      if (moveIndex == 1 || millis() - timeNow > computerTurnWait) {
         setRGB(lastMove -1, playColors[0], playFadeSpeed);
         displayLastMove('c', playSymbol[0], lastMove);
         showBoard();
@@ -535,7 +535,7 @@ void loop() {
     break;
 
     case 5: // wait for the effect to end, because it hangs on move calculation
-      time_now = millis();
+      timeNow = millis();
       if (!runningRGB())
         state = 2;
     break;
@@ -591,17 +591,17 @@ void loop() {
         state = 21;
       else
         state = 22;
-      time_now = millis();
+      timeNow = millis();
     break;
 
     case 21: // draw state
-      if (millis() - time_now > drawDimWait) {
+      if (millis() - timeNow > drawDimWait) {
         state = 31;
       }
     break;
 
     case 22: // win state
-      if (millis() - time_now > winDimWait) {
+      if (millis() - timeNow > winDimWait) {
         state = 31;
       }
     break;
