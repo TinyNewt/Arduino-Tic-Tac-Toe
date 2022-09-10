@@ -683,8 +683,10 @@ void loop() {
       Serial.println("gameover");
       glowOptions();
 
-      if (gameEnded == 1)
-        state = 21;
+      if (gameEnded == 1) {
+        if (gameOver())
+          state = 21;
+      }
       else
         state = 22;
       timeNow = millis();
