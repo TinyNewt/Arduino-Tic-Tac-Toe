@@ -11,7 +11,7 @@ const int playFadeSpeed = 500;
 
 const char playSymbol[2] = {'X', 'O'};
 const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board color in RGB
-const byte optionBrightness = 5; // set the brightness for displaying the options
+const byte optionBrightness = 40; // set the brightness for displaying the options
 const int endFadeSpeed = 700; // speed that the none winning positions fade down
 const int playerBrightness =100; // brightness of the player selection leds
 const byte endBrightness = 5; // brightness at gameover that are not winners
