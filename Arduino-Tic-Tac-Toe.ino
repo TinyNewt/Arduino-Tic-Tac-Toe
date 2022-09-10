@@ -11,10 +11,10 @@ const int playFadeSpeed = 500;
 
 const char playSymbol[2] = {'X', 'O'};
 const byte playColors[2][3] = {{255,0,0}, {0,255,0}}; // board color in RGB
-const byte optionBrightness = 40; // set the brightness for displaying the options
+const byte optionBrightness = 20; // set the brightness for displaying the options
 const int endFadeSpeed = 700; // speed that the none winning positions fade down
 const int playerBrightness =100; // brightness of the player selection leds
-const byte endBrightness = 5; // brightness at gameover that are not winners
+const byte endBrightness = 20; // brightness at gameover that are not winners
 const int drawDimWait = 1000; // wait before the end dim state in a draw
 const int winDimWait = 1000; // wait before the end dim state when there is a winner
 const int endStateKeyTimeout = 3000; // wait before the game can be restarted via the gameboard
@@ -681,14 +681,18 @@ void loop() {
         turn = !turn;
 
       Serial.println("gameover");
-      glowOptions();
-
       if (gameEnded == 1) {
-        if (gameOver())
+        if (gameOver()) {
+          gameEnded = gameOver();
+          state = 22;
+        } else
           state = 21;
       }
       else
         state = 22;
+      
+      glowOptions();
+
       timeNow = millis();
     break;
 
