@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    version="1.1"
-   width="806.40002pt"
-   height="797.28003pt"
-   viewBox="0 0 806.40005 797.28002"
+   width="816.40002pt"
+   height="807.28003pt"
+   viewBox="0 0 816.40005 807.28002"
    id="svg11594"
    sodipodi:docname="schematic.svg"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
@@ -353,9 +353,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="pt"
      showgrid="false"
-     inkscape:zoom="0.52225077"
-     inkscape:cx="804.21135"
-     inkscape:cy="471.03808"
+     inkscape:zoom="1.4771482"
+     inkscape:cx="420.40465"
+     inkscape:cy="222.72646"
      inkscape:window-width="1920"
      inkscape:window-height="1009"
      inkscape:window-x="-8"
@@ -364,7 +364,7 @@
      inkscape:current-layer="svg11594" />
   <g
      id="g20913"
-     transform="translate(-17.76,-196.8)">
+     transform="translate(-12.759988,-191.79999)">
     <g
        clip-path="url(#cp0)"
        id="g5808">
