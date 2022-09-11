@@ -5,12 +5,13 @@
    height="816.41925pt"
    viewBox="0 0 824.01707 816.41924"
    id="svg11594"
-   sodipodi:docname="schematic.svg"
-   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title9658">Digital Tic Tac Toe circuit by TinyNewt</title>
   <defs
      id="defs11598">
     <clipPath
@@ -366,26 +367,6 @@
          id="path11258" />
     </clipPath>
   </defs>
-  <sodipodi:namedview
-     id="namedview11596"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="pt"
-     showgrid="false"
-     inkscape:zoom="0.7385741"
-     inkscape:cx="518.56679"
-     inkscape:cy="884.13607"
-     inkscape:window-width="1920"
-     inkscape:window-height="1009"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg11594" />
   <rect
      style="fill:#ffffff;stroke-width:0.721239"
      id="rect3828"
@@ -16316,4 +16297,13 @@
       </g>
     </g>
   </g>
+  <metadata
+     id="metadata9656">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Digital Tic Tac Toe circuit by TinyNewt</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
 </svg>
