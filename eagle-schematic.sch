@@ -20876,32 +20876,26 @@ Based on the following sources:
 <label x="60.96" y="58.42" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
-<net name="N$39" class="0">
-<segment>
-<pinref part="IC4" gate="A" pin="QC"/>
-<wire x1="210.82" y1="35.56" x2="226.06" y2="35.56" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="N$40" class="0">
 <segment>
 <wire x1="193.04" y1="-12.7" x2="193.04" y2="5.08" width="0.1524" layer="91"/>
 <wire x1="193.04" y1="5.08" x2="218.44" y2="5.08" width="0.1524" layer="91"/>
-<pinref part="IC4" gate="A" pin="QD"/>
-<wire x1="218.44" y1="5.08" x2="218.44" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="218.44" y1="33.02" x2="210.82" y2="33.02" width="0.1524" layer="91"/>
+<wire x1="218.44" y1="5.08" x2="218.44" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="LEDSW1" gate="G$1" pin="A"/>
 <wire x1="200.66" y1="-12.7" x2="193.04" y2="-12.7" width="0.1524" layer="91"/>
+<pinref part="IC4" gate="A" pin="QC"/>
+<wire x1="210.82" y1="35.56" x2="218.44" y2="35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$41" class="0">
 <segment>
-<pinref part="IC4" gate="A" pin="QE"/>
-<wire x1="210.82" y1="30.48" x2="215.9" y2="30.48" width="0.1524" layer="91"/>
-<wire x1="215.9" y1="30.48" x2="215.9" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="215.9" y1="33.02" x2="215.9" y2="7.62" width="0.1524" layer="91"/>
 <wire x1="215.9" y1="7.62" x2="190.5" y2="7.62" width="0.1524" layer="91"/>
 <wire x1="190.5" y1="7.62" x2="190.5" y2="-40.64" width="0.1524" layer="91"/>
 <pinref part="LEDSW2" gate="G$1" pin="A"/>
 <wire x1="200.66" y1="-40.64" x2="190.5" y2="-40.64" width="0.1524" layer="91"/>
+<pinref part="IC4" gate="A" pin="QD"/>
+<wire x1="210.82" y1="33.02" x2="215.9" y2="33.02" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="SW-P1" class="0">
