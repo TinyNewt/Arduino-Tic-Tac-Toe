@@ -1,3 +1,8 @@
+//
+// Arduino Tic Tac Toe, created by TinyNewt
+//
+// Arduino ShiftPWM library: https://github.com/elcojacobs/ShiftPWM
+//
 const int ShiftPWM_latchPin=2;
 const bool ShiftPWM_invertOutputs = false;
 const bool ShiftPWM_balanceLoad = false;
