@@ -2,6 +2,7 @@
 // Arduino Tic Tac Toe, created by TinyNewt
 //
 // Arduino ShiftPWM library: https://github.com/elcojacobs/ShiftPWM
+// minimax (AI) based on https://github.com/Prajwal-P/TicTacToe-with-AI 
 //
 const int ShiftPWM_latchPin=2;
 const bool ShiftPWM_invertOutputs = false;
